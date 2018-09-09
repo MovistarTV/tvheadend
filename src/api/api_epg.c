@@ -170,6 +170,10 @@ api_epg_entry ( epg_broadcast_t *eb, const char *lang, access_t *perm, const cha
   /* Image */
   if (eb->image)
     htsmsg_add_str(m, "image", eb->image);
+    
+  /* Original Title */
+  if (eb->original_title)
+    htsmsg_add_str(m, "originalTitle", eb->original_title);
 
   /* Rating */
   if (eb->star_rating)

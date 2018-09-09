@@ -483,6 +483,21 @@ static int _xmltv_parse_age_rating
 }
 
 /*
+ * Parse original title
+ * <original-title>Title</original-title>
+ */
+static int _xmltv_parse_original_title
+  ( epg_broadcast_t *ebc, htsmsg_t *tags, epg_changes_t *changes )
+{
+  const char *original_title;
+
+  if (!ebc || !tags) return 0;
+  if (!(original_title = htsmsg_xml_get_cdata_str(tags, "original-title"))) return 0;
+
+  return epg_broadcast_set_original_title(ebc, original_title, changes);
+}
+
+/*
  * Parse category list
  */
 static epg_genre_list_t
@@ -775,6 +790,8 @@ static int _xmltv_parse_programme_tags
   save |= _xmltv_parse_date_finished(ebc, tags, &changes);
 
   save |= _xmltv_parse_age_rating(ebc, tags, &changes);
+
+  save |= _xmltv_parse_original_title(ebc, tags, &changes);
 
   if (icon)
     save |= epg_broadcast_set_image(ebc, icon, &changes);

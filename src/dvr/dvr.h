@@ -232,6 +232,7 @@ typedef struct dvr_entry {
   lang_str_t *de_summary;    /* Summary in UTF-8 (from EPG) */
   lang_str_t *de_desc;       /* Description in UTF-8 (from EPG) */
   uint32_t de_content_type;  /* Content type (from EPG) (only code) */
+  uint32_t de_genre;         /* Episode genre (from EPG) (only code) */
   uint16_t de_copyright_year; /* Copyright year (from EPG) */
   uint16_t de_dvb_eid;
 

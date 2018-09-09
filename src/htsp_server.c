@@ -1004,6 +1004,7 @@ htsp_build_dvrentry(htsp_connection_t *htsp, dvr_entry_t *de, const char *method
       u32 = DVR_PRIO_NORMAL;
     htsmsg_add_u32(out, "priority",    u32);
     htsmsg_add_u32(out, "contentType", de->de_content_type);
+    htsmsg_add_u32(out, "genre",       de->de_genre);
 
     if (de->de_sched_state == DVR_RECORDING || de->de_sched_state == DVR_COMPLETED) {
       htsmsg_add_u32(out, "playcount",    de->de_playcount);
@@ -1312,6 +1313,8 @@ htsp_build_event
   htsp_serialize_epnum(out, &epnum, NULL);
   if (e->image)
     htsmsg_add_str(out, "image", e->image);
+  if (e->original_title)
+    htsmsg_add_str(out, "originalTitle", e->original_title);
 
   if (e->channel) {
     LIST_FOREACH(de, &e->channel->ch_dvrs, de_channel_link) {

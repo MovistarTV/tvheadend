@@ -149,6 +149,7 @@ typedef uint64_t epg_changes_t;
 #define EPG_CHANGED_AGE_RATING     (1ULL<<31)
 #define EPG_CHANGED_FIRST_AIRED    (1ULL<<32)
 #define EPG_CHANGED_COPYRIGHT_YEAR (1ULL<<33)
+#define EPG_CHANGED_ORIGINAL_TITLE (1ULL<<34)
 
 typedef struct epg_object_ops {
   void (*getref)  ( void *o );        ///< Get a reference
@@ -287,6 +288,7 @@ struct epg_broadcast
   lang_str_t                *summary;          ///< Summary
   lang_str_t                *description;      ///< Description
 
+  char                      *original_title;   ///< Original title
   char                      *image;            ///< Episode image
   epg_genre_list_t           genre;            ///< Episode genre(s)
   epg_episode_num_t          epnum;            ///< Episode numbering; NOTE: use the accessor routine!
@@ -399,6 +401,9 @@ int epg_broadcast_set_genre
   __attribute__((warn_unused_result));
 int epg_broadcast_set_image
   ( epg_broadcast_t *b, const char *i, epg_changes_t *changed )
+  __attribute__((warn_unused_result));
+int epg_broadcast_set_original_title
+  ( epg_broadcast_t *b, const char *original_title, epg_changes_t *changed )
   __attribute__((warn_unused_result));
 int epg_broadcast_set_is_bw
   ( epg_broadcast_t *b, uint8_t bw, epg_changes_t *changed )

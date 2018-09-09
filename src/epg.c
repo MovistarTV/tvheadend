@@ -858,10 +858,11 @@ static void _epg_broadcast_destroy ( void *eo )
   }
   free(ebc->image);
   free(ebc->epnum.text);
-  if (ebc->credits)     htsmsg_destroy(ebc->credits);
+  free(ebc->original_title);
+  if (ebc->credits)        htsmsg_destroy(ebc->credits);
   if (ebc->credits_cached) lang_str_destroy(ebc->credits_cached);
-  if (ebc->category)    string_list_destroy(ebc->category);
-  if (ebc->keyword)     string_list_destroy(ebc->keyword);
+  if (ebc->category)       string_list_destroy(ebc->category);
+  if (ebc->keyword)        string_list_destroy(ebc->keyword);
   if (ebc->keyword_cached) lang_str_destroy(ebc->keyword_cached);
   epg_set_broadcast_remove(&epg_serieslinks, ebc->serieslink, ebc);
   epg_set_broadcast_remove(&epg_episodelinks, ebc->episodelink, ebc);
@@ -1014,6 +1015,8 @@ int epg_broadcast_change_finish
     save |= _epg_object_set_u16(broadcast, &broadcast->epnum.p_cnt, 0, NULL, 0);
   if (!(changes & EPG_CHANGED_EPTEXT))
     save |= _epg_object_set_str(broadcast, &broadcast->epnum.text, NULL, NULL, 0);
+  if (!(changes & EPG_CHANGED_ORIGINAL_TITLE))
+    save |= epg_broadcast_set_original_title(broadcast, NULL, NULL);
   if (!(changes & EPG_CHANGED_FIRST_AIRED))
     save |= epg_broadcast_set_first_aired(broadcast, 0, NULL);
   if (!(changes & EPG_CHANGED_COPYRIGHT_YEAR))
@@ -1058,6 +1061,7 @@ epg_broadcast_t *epg_broadcast_clone
     *save |= epg_broadcast_set_summary(ebc, src->summary, &changes);
     *save |= epg_broadcast_set_description(ebc, src->description, &changes);
     *save |= epg_broadcast_set_epnum(ebc, &src->epnum, &changes);
+    *save |= epg_broadcast_set_original_title(ebc, src->original_title, &changes);
     *save |= epg_broadcast_set_credits(ebc, src->credits, &changes);
     *save |= epg_broadcast_set_category(ebc, src->category, &changes);
     *save |= epg_broadcast_set_keyword(ebc, src->keyword, &changes);
@@ -1425,6 +1429,14 @@ int epg_broadcast_set_genre
   return save;
 }
 
+int epg_broadcast_set_original_title
+  ( epg_broadcast_t *b, const char *original_title, epg_changes_t *changed )
+{
+  if (!b) return 0;
+  return _epg_object_set_str(b, &b->original_title, original_title,
+                             changed, EPG_CHANGED_ORIGINAL_TITLE);
+}
+
 int epg_broadcast_set_copyright_year
   ( epg_broadcast_t *b, uint16_t year, epg_changes_t *changed )
 {
@@ -1580,6 +1592,8 @@ htsmsg_t *epg_broadcast_serialize ( epg_broadcast_t *broadcast )
     htsmsg_add_u32(a, NULL, eg->code);
   }
   if (a) htsmsg_add_msg(m, "genre", a);
+  if (broadcast->original_title)
+    htsmsg_add_str(m, "otitle", broadcast->original_title);
   if (broadcast->copyright_year)
     htsmsg_add_u32(m, "cyear", broadcast->copyright_year);
   if (broadcast->first_aired)
@@ -1699,6 +1713,9 @@ epg_broadcast_t *epg_broadcast_deserialize
     *save |= epg_broadcast_set_epnum(ebc, &num, &changes);
     if (num.text) free(num.text);
   }
+  
+  if ((str = htsmsg_get_str(m, "otitle")))
+    *save |= epg_broadcast_set_original_title(ebc, str, &changes);
 
   if (!htsmsg_get_u32(m, "cyear", &u32))
     *save |= epg_broadcast_set_copyright_year(ebc, u32, &changes);

@@ -1069,8 +1069,10 @@ dvr_entry_create_from_htsmsg(htsmsg_t *conf, epg_broadcast_t *e)
     if (e->image)
       htsmsg_add_str(conf, "image", e->image);
     genre = LIST_FIRST(&e->genre);
-    if (genre)
+    if (genre) {
       htsmsg_add_u32(conf, "content_type", genre->code / 16);
+      htsmsg_add_u32(conf, "genre", genre->code);
+    }
   }
 
   de = dvr_entry_create(NULL, conf, 0);
@@ -3574,6 +3576,15 @@ dvr_entry_class_content_type_list(void *o, const char *lang)
   return m;
 }
 
+static htsmsg_t *
+dvr_entry_class_genre_list(void *o, const char *lang)
+{
+  htsmsg_t *m = htsmsg_create_map();
+  htsmsg_add_str(m, "type",  "api");
+  htsmsg_add_str(m, "uri",   "epg/genre/list");
+  return m;
+}
+
 CLASS_DOC(dvrentry)
 PROP_DOC(dvr_status)
 PROP_DOC(dvr_start_extra)
@@ -4000,6 +4011,15 @@ const idclass_t dvr_entry_class = {
       .list     = dvr_entry_class_content_type_list,
       .off      = offsetof(dvr_entry_t, de_content_type),
       .opts     = PO_RDONLY | PO_SORTKEY,
+    },
+    {
+      .type     = PT_U32,
+      .id       = "genre",
+      .name     = N_("Episode genre"),
+      .desc     = N_("Episode genre code."),
+      .list     = dvr_entry_class_genre_list,
+      .off      = offsetof(dvr_entry_t, de_genre),
+      .opts     = PO_RDONLY,
     },
     {
       .type     = PT_U16,
